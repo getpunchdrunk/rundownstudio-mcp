@@ -1,0 +1,26 @@
+# Cloudflare Worker for the Rundown Studio MCP server. See README.md.
+# No secrets or account details here. account_id comes from `wrangler login`.
+# Secrets (RUNDOWN_STUDIO_TOKEN, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET,
+# ALLOWED_EMAILS) are set with `wrangler secret put`.
+
+name = "rundown-studio-mcp"
+main = "src/index.ts"
+compatibility_date = "2026-10-01"
+# global_fetch_strictly_public: required by workers-oauth-provider for Client ID Metadata Documents.
+compatibility_flags = ["nodejs_compat", "global_fetch_strictly_public"]
+workers_dev = true
+
+[dev]
+port = 8787
+
+[observability]
+enabled = true
+
+# Keep console.* logs but not per-request invocation logs, which record full URLs
+# (OAuth callbacks carry one-time codes in theirs).
+[observability.logs]
+invocation_logs = false
+
+# OAuth grants and tokens. No id: wrangler creates the namespace on first deploy.
+[[kv_namespaces]]
+binding = "OAUTH_KV"

@@ -1,0 +1,15 @@
+# Copy to .dev.vars (gitignored) for `npm run dev` and `npm run smoke`.
+# Deployed values are set separately with `npx wrangler secret put <NAME>`.
+
+# Rundown Studio API token (Rundown Studio, Settings, API).
+RUNDOWN_STUDIO_TOKEN=replace-me
+
+# Google OAuth client used only for sign-in (openid email).
+GOOGLE_CLIENT_ID=replace-me.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=replace-me
+
+# Comma-separated Google accounts allowed to connect.
+ALLOWED_EMAILS=you@example.com
+
+# Rundown used by `npm run smoke`. It adds and then deletes one temporary cue.
+TEST_RUNDOWN_ID=replace-me

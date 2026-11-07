@@ -1,0 +1,33 @@
+{
+  "name": "rundown-studio-mcp",
+  "version": "1.0.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "dev:doppler": "doppler run -- env CLOUDFLARE_INCLUDE_PROCESS_ENV=true wrangler dev",
+    "deploy": "bash scripts/deploy.sh",
+    "secrets:push": "bash scripts/secrets-push.sh",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "generate": "tsx scripts/generate-tools.ts",
+    "smoke": "tsx scripts/smoke.ts",
+    "smoke:doppler": "doppler run -- tsx scripts/smoke.ts",
+    "scan": "sh scripts/scan.sh"
+  },
+  "dependencies": {
+    "@cfworker/json-schema": "4.1.1",
+    "@cloudflare/workers-oauth-provider": "1.2.4",
+    "@modelcontextprotocol/sdk": "1.32.2"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "5.20261104.1",
+    "@types/node": "24.10.1",
+    "tsx": "4.23.15",
+    "typescript": "5.8.3",
+    "vitest": "4.1.12",
+    "wrangler": "4.158.0",
+    "yaml": "2.9.1"
+  }
+}

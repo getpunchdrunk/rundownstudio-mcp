@@ -129,7 +129,7 @@ npm run dev                      # http://localhost:8787
 | `npm run smoke` | Live check against the real API, using `RUNDOWN_STUDIO_TOKEN` and `TEST_RUNDOWN_ID` from `.dev.vars`. It adds one temporary cue to the end of that rundown, writes and reads one of its cells, then deletes it. Existing content is not touched. |
 | `npm run generate` | Regenerates `src/tools.generated.ts` from the published OpenAPI spec. |
 | `npm run deploy` | Deploys to production. Refuses if there are uncommitted changes, and asks you to type `yes` when the current branch isn't `main`. Runs `secrets:push` (below), then `wrangler deploy` tagged with the short commit SHA, and prints the new version ID with that SHA. |
-| `npm run scan` | Secret scan of the working tree and full git history with [gitleaks](https://github.com/gitleaks/gitleaks), plus checks for emails, workers.dev hostnames, local paths and ID-shaped strings. Run it before every push. |
+| `npm run scan` | Secret scan of the working tree and full git history with [gitleaks](https://github.com/gitleaks/gitleaks), plus checks for emails, workers.dev hostnames, local paths, ID-shaped strings and the private terms listed in a gitignored `.scan-terms` file. Those checks cover current files, every line in the current branch's history and its commit messages; set `SCAN_REFS=--all` to check every ref. Run it before every push. |
 
 ### Optional: Doppler
 

@@ -11,6 +11,9 @@ export interface Env {
   GOOGLE_CLIENT_SECRET: string;
   ALLOWED_EMAILS: string;
 
+  // Optional var: extra OAuth redirect URIs for MCP clients not in the defaults.
+  EXTRA_REDIRECT_URIS?: string;
+
   // Injected by @cloudflare/workers-oauth-provider
   OAUTH_PROVIDER: OAuthHelpers;
 }

@@ -8,7 +8,9 @@ vi.mock('@cloudflare/workers-oauth-provider', () => ({
   authorizationErrorRedirect: vi.fn(),
 }));
 
-const { isRedirectUriAllowed, isEmailAllowed } = await import('../src/googleHandler');
+const { isRedirectUriAllowed, isEmailAllowed, parseExtraRedirectPatterns } = await import(
+  '../src/googleHandler'
+);
 const { mcpApiHandler } = await import('../src/mcpHandler');
 const { missingSecrets } = await import('../src/env');
 const { API_BASE } = await import('../src/rundownClient');
@@ -57,6 +59,34 @@ describe('allowlist, redirect URIs, secrets', () => {
     expect(isRedirectUriAllowed('https://chatgpt.com/evil', BASE)).toBe(false);
     expect(isRedirectUriAllowed('https://chatgpt.com/connector_platform_oauth_redirect/extra', BASE)).toBe(false);
     expect(isRedirectUriAllowed('https://chatgpt.com.evil.example/connector/oauth/x', BASE)).toBe(false);
+  });
+
+  it('allows the default local, Cursor and VS Code redirects', () => {
+    expect(isRedirectUriAllowed('http://127.0.0.1:33418/callback', BASE)).toBe(true);
+    expect(isRedirectUriAllowed('cursor://anysphere.cursor-retrieval/oauth/callback', BASE)).toBe(true);
+    expect(isRedirectUriAllowed('https://vscode.dev/redirect', BASE)).toBe(true);
+  });
+
+  it('rejects userinfo and malformed redirect URIs', () => {
+    expect(isRedirectUriAllowed('http://localhost:1@evil.example.com/cb', BASE)).toBe(false);
+    expect(isRedirectUriAllowed('https://claude.ai@evil.example.com/cb', BASE)).toBe(false);
+    expect(isRedirectUriAllowed('not a url', BASE)).toBe(false);
+  });
+
+  it('accepts extra redirect URIs from EXTRA_REDIRECT_URIS', () => {
+    const extra = ' https://app.example.com/oauth/* , myclient://* ';
+    expect(isRedirectUriAllowed('https://app.example.com/oauth/cb', BASE, extra)).toBe(true);
+    expect(isRedirectUriAllowed('myclient://callback', BASE, extra)).toBe(true);
+    expect(isRedirectUriAllowed('https://app.example.com/other', BASE, extra)).toBe(false);
+    expect(isRedirectUriAllowed('https://app.example.com/oauth/cb', BASE)).toBe(false);
+  });
+
+  it('ignores extra patterns that wildcard an http(s) host', () => {
+    expect(parseExtraRedirectPatterns('*, https://*, https://*.example.com/cb, http://evil*/x')).toEqual(
+      []
+    );
+    expect(isRedirectUriAllowed('https://evil.example/cb', BASE, '*,https://*')).toBe(false);
+    expect(parseExtraRedirectPatterns(undefined)).toEqual([]);
   });
 
   it('names missing secrets and the KV binding, never values', () => {

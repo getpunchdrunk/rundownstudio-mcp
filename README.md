@@ -1,6 +1,6 @@
 # Rundown Studio MCP
 
-A remote [MCP](https://modelcontextprotocol.io) server that lets Claude (or any MCP client) read
+A remote [MCP](https://modelcontextprotocol.io) server that lets Claude, ChatGPT or any MCP client read
 and edit [Rundown Studio](https://rundownstudio.app) rundowns through the
 [Rundown Studio v1 API](https://rundownstudio.app/docs/api-v1). It runs as a single Cloudflare
 Worker that you deploy to your own Cloudflare account with `wrangler`.
@@ -108,6 +108,7 @@ npx wrangler secret put ALLOWED_EMAILS
 | `GOOGLE_CLIENT_ID` | Client ID of the Google OAuth client from step 3. |
 | `GOOGLE_CLIENT_SECRET` | Its client secret. |
 | `ALLOWED_EMAILS` | Comma-separated Google accounts allowed to connect, e.g. `you@example.com,producer@example.com`. |
+| `EXTRA_REDIRECT_URIS` | Optional. OAuth redirect URIs for MCP clients not allowed by default. See step 5. |
 
 ### 5. Connect it to an MCP client
 
@@ -120,7 +121,20 @@ Approve the consent page, then sign in with an allowlisted Google account.
 depending on your plan). Enter the server URL, choose OAuth as the authentication, then approve
 the consent page and sign in with an allowlisted Google account.
 
-**Other clients:** clients that use a `localhost` OAuth callback, or Cursor, should also work.
+**Other clients:** any MCP client that supports remote servers with OAuth can connect. These
+callbacks are allowed by default: Claude, ChatGPT, Cursor, VS Code, and local clients on
+`localhost` or `127.0.0.1` (CLIs, desktop apps, MCP Inspector). If a client is refused with
+"This app is not allowed to connect to this server", find its OAuth redirect URI in its docs and
+add it:
+
+```sh
+npx wrangler secret put EXTRA_REDIRECT_URIS
+# e.g. https://app.example.com/oauth/callback,myclient://*
+```
+
+It takes a comma-separated list where `*` matches anything. `http(s)` entries must name an exact
+host, so a wildcard host such as `https://*` is ignored. Only allowlisted Google accounts can
+finish sign-in, whichever client starts it.
 
 ## Local development
 
@@ -215,8 +229,10 @@ rundown with more than 1,000 cells, use `list_cells` instead.
   `reorder_cues` read the rundown's cues first. `delete_cue` refuses a locked cue, or a group holding
   one. `reorder_cues` refuses any order that changes a locked cue's group or its index among its
   siblings; other cues may still move. If the cues can't be read, both refuse rather than guess.
-- Only redirect URIs for Claude, Cursor and localhost are accepted when connecting (see
-  `allowedRedirectPatterns` in `src/googleHandler.ts`).
+- Only allowlisted OAuth redirect URIs are accepted when connecting: the defaults in
+  `DEFAULT_REDIRECT_PATTERNS` (`src/googleHandler.ts`) plus any in `EXTRA_REDIRECT_URIS`. Wildcard
+  `http(s)` hosts are ignored, and redirect URIs carrying a username or password are refused. The
+  consent page shows which host access will be sent to.
 
 ## Project layout
 

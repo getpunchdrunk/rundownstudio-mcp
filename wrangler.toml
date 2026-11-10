@@ -1,7 +1,7 @@
 # Cloudflare Worker for the Rundown Studio MCP server. See README.md.
 # No secrets or account details here. account_id comes from `wrangler login`.
 # Secrets (RUNDOWN_STUDIO_TOKEN, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET,
-# ALLOWED_EMAILS) are set with `wrangler secret put`.
+# ALLOWED_EMAILS, optional EXTRA_REDIRECT_URIS) are set with `wrangler secret put`.
 
 name = "rundown-studio-mcp"
 main = "src/index.ts"

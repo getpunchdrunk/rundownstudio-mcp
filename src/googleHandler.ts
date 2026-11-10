@@ -24,22 +24,55 @@ const GOOGLE_USERINFO_ENDPOINT = 'https://openidconnect.googleapis.com/v1/userin
 /** Sign-in only: who you are, nothing else. */
 export const GOOGLE_SIGN_IN_SCOPES = ['openid', 'email'];
 
-/** Redirect URIs an MCP client may use. */
-export function allowedRedirectPatterns(baseUrl: string): string[] {
-  return [
-    'http://localhost:*',
-    `${baseUrl}/*`,
-    'cursor://*',
-    'https://claude.ai/*',
-    'https://claude.com/*',
-    'claude://*',
-    'https://chatgpt.com/connector/oauth/*',
-    'https://chatgpt.com/connector_platform_oauth_redirect',
-  ];
+/** Redirect URIs any deployment accepts: common MCP clients plus local tools. */
+export const DEFAULT_REDIRECT_PATTERNS = [
+  // Local clients (MCP Inspector, CLIs, desktop apps, VS Code).
+  'http://localhost:*',
+  'http://127.0.0.1:*',
+  // Claude (web, desktop, mobile).
+  'https://claude.ai/*',
+  'https://claude.com/*',
+  'claude://*',
+  // ChatGPT connectors (current per-connector callback, then the legacy one).
+  'https://chatgpt.com/connector/oauth/*',
+  'https://chatgpt.com/connector_platform_oauth_redirect',
+  // Cursor and VS Code.
+  'cursor://*',
+  'https://vscode.dev/redirect',
+];
+
+/**
+ * Parses EXTRA_REDIRECT_URIS: comma-separated patterns where `*` matches anything.
+ * http(s) patterns must name a literal host, so a wildcard can never open the allowlist
+ * to any site. App schemes (myapp://*) may wildcard everything after the scheme.
+ */
+export function parseExtraRedirectPatterns(raw: string | undefined): string[] {
+  if (!raw) return [];
+  return raw
+    .split(',')
+    .map((s) => s.trim())
+    .filter((p) => {
+      const http = /^https?:\/\/([^/*]+)(\/.*)?$/i.exec(p);
+      if (http) return true;
+      if (/^https?:/i.test(p)) return false;
+      return /^[a-z][a-z0-9+.-]*:\/\/.+$/i.test(p);
+    });
 }
 
-export function isRedirectUriAllowed(uri: string, baseUrl: string): boolean {
-  return allowedRedirectPatterns(baseUrl).some((pattern) => {
+/** Redirect URIs an MCP client may use. */
+export function allowedRedirectPatterns(baseUrl: string, extra?: string): string[] {
+  return [...DEFAULT_REDIRECT_PATTERNS, `${baseUrl}/*`, ...parseExtraRedirectPatterns(extra)];
+}
+
+export function isRedirectUriAllowed(uri: string, baseUrl: string, extra?: string): boolean {
+  // Reject userinfo tricks like http://localhost:1@evil.example.com/ that a prefix match would pass.
+  try {
+    const parsed = new URL(uri);
+    if (parsed.username || parsed.password) return false;
+  } catch {
+    return false;
+  }
+  return allowedRedirectPatterns(baseUrl, extra).some((pattern) => {
     const regex = new RegExp(
       '^' +
         pattern
@@ -112,7 +145,7 @@ async function getAuthorize(request: Request, env: Env): Promise<Response> {
   try {
     const oauth = env.OAUTH_PROVIDER;
     const authRequest = await oauth.parseAuthRequest(request);
-    if (!isRedirectUriAllowed(authRequest.redirectUri, originOf(request))) {
+    if (!isRedirectUriAllowed(authRequest.redirectUri, originOf(request), env.EXTRA_REDIRECT_URIS)) {
       return errorPage('This app is not allowed to connect to this server.', 403);
     }
     const details = await oauth.describeConsent(authRequest);

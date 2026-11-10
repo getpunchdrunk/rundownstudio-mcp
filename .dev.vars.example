@@ -11,5 +11,8 @@ GOOGLE_CLIENT_SECRET=replace-me
 # Comma-separated Google accounts allowed to connect.
 ALLOWED_EMAILS=you@example.com
 
+# Optional. Extra OAuth redirect URIs for MCP clients not allowed by default (see README).
+# EXTRA_REDIRECT_URIS=https://app.example.com/oauth/callback
+
 # Rundown used by `npm run smoke`. It adds and then deletes one temporary cue.
 TEST_RUNDOWN_ID=replace-me

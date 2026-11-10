@@ -34,10 +34,10 @@ cell first and refuses to write if it holds anything beyond plain text, unless t
 ## How access works
 
 ```
-Claude ──OAuth 2.1──► Worker (/authorize, /callback, /token, /register, /mcp)
-                        │  Google sign-in, checked against ALLOWED_EMAILS
-                        ▼
-                      MCP tools ──► Rundown Studio v1 API (your team API token)
+Claude / ChatGPT ──OAuth 2.1──► Worker (/authorize, /callback, /token, /register, /mcp)
+                                 │  Google sign-in, checked against ALLOWED_EMAILS
+                                 ▼
+                               MCP tools ──► Rundown Studio v1 API (your team API token)
 ```
 
 - **Connecting** uses OAuth 2.1 via
@@ -109,11 +109,18 @@ npx wrangler secret put ALLOWED_EMAILS
 | `GOOGLE_CLIENT_SECRET` | Its client secret. |
 | `ALLOWED_EMAILS` | Comma-separated Google accounts allowed to connect, e.g. `you@example.com,producer@example.com`. |
 
-### 5. Connect it to Claude
+### 5. Connect it to an MCP client
 
-In Claude, open **Settings → Connectors → Add custom connector** and enter
-`https://rundown-studio-mcp.<your-subdomain>.workers.dev/mcp`. Approve the consent page, then sign
-in with an allowlisted Google account.
+The server URL is `https://rundown-studio-mcp.<your-subdomain>.workers.dev/mcp`.
+
+**Claude:** open **Settings → Connectors → Add custom connector** and enter the server URL.
+Approve the consent page, then sign in with an allowlisted Google account.
+
+**ChatGPT:** in Settings, add a custom MCP server (custom connectors may require developer mode,
+depending on your plan). Enter the server URL, choose OAuth as the authentication, then approve
+the consent page and sign in with an allowlisted Google account.
+
+**Other clients:** clients that use a `localhost` OAuth callback, or Cursor, should also work.
 
 ## Local development
 

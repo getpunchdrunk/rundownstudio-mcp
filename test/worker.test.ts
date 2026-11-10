@@ -44,11 +44,19 @@ describe('allowlist, redirect URIs, secrets', () => {
     expect(isEmailAllowed(undefined, 'owner@example.com')).toBe(false);
   });
 
-  it('allows the claude.ai redirect patterns only', () => {
+  it('allows the claude.ai redirect patterns', () => {
     expect(isRedirectUriAllowed('https://claude.ai/api/mcp/auth_callback', BASE)).toBe(true);
     expect(isRedirectUriAllowed('http://localhost:6274/oauth/callback', BASE)).toBe(true);
     expect(isRedirectUriAllowed('https://evil.example/callback', BASE)).toBe(false);
     expect(isRedirectUriAllowed('https://claude.ai.evil.example/cb', BASE)).toBe(false);
+  });
+
+  it('allows the ChatGPT connector redirect URIs only', () => {
+    expect(isRedirectUriAllowed('https://chatgpt.com/connector/oauth/abc123', BASE)).toBe(true);
+    expect(isRedirectUriAllowed('https://chatgpt.com/connector_platform_oauth_redirect', BASE)).toBe(true);
+    expect(isRedirectUriAllowed('https://chatgpt.com/evil', BASE)).toBe(false);
+    expect(isRedirectUriAllowed('https://chatgpt.com/connector_platform_oauth_redirect/extra', BASE)).toBe(false);
+    expect(isRedirectUriAllowed('https://chatgpt.com.evil.example/connector/oauth/x', BASE)).toBe(false);
   });
 
   it('names missing secrets and the KV binding, never values', () => {

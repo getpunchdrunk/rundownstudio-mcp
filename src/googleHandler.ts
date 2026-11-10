@@ -33,6 +33,8 @@ export function allowedRedirectPatterns(baseUrl: string): string[] {
     'https://claude.ai/*',
     'https://claude.com/*',
     'claude://*',
+    'https://chatgpt.com/connector/oauth/*',
+    'https://chatgpt.com/connector_platform_oauth_redirect',
   ];
 }
 

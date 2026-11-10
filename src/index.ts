@@ -2,10 +2,10 @@
 //
 // Cloudflare Worker serving a Rundown Studio MCP server.
 //
-//   claude.ai ──OAuth 2.1──► Worker (/authorize, /callback, /token, /register, /mcp)
-//                              │  Google sign-in, ALLOWED_EMAILS
-//                              ▼
-//                            MCP tools ──► Rundown Studio v1 API (RUNDOWN_STUDIO_TOKEN)
+//   claude.ai / chatgpt.com ──OAuth 2.1──► Worker (/authorize, /callback, /token, /register, /mcp)
+//                                            │  Google sign-in, ALLOWED_EMAILS
+//                                            ▼
+//                                          MCP tools ──► Rundown Studio v1 API (RUNDOWN_STUDIO_TOKEN)
 //
 // See README.md for setup, secrets and the allowlist.
 
